@@ -4,7 +4,7 @@ module.exports = function(app, db) {
     app.get('/projects/:id', (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectID(id) };
-        db.collection('users').findOne(details, (err, item) => {
+        db.collection('projects').findOne(details, (err, item) => {
             if (err) {
                 res.send({'error': 'An error has occurred'});
             } else {
@@ -29,14 +29,17 @@ module.exports = function(app, db) {
       });
     });
     app.post('/projects', (req, res) => {
+      console.log(req.body);
       const project = {
         tasks: req.body.tasks,
-        title: req.body.title
+        title: req.body.title,
+        avatar: req.body.avatar
       };
       db.collection('projects').insert(project, (err, result) => {
         if (err) { 
           res.send({ 'error': 'An error has occurred' }); 
         } else {
+          console.log(result);
           res.send(result.ops[0]);
         }
       });
@@ -45,8 +48,9 @@ module.exports = function(app, db) {
         const id = req.params.id;
         const details = { '_id': new ObjectID(id) };
         const project = {
-          tasks: req.body.tasks,
-          title: req.body.title
+            tasks: req.body.tasks,
+            title: req.body.title,
+            avatar: req.body.avatar
         };
         db.collection('projects').update(details, project, (err, result) => {
           if (err) {

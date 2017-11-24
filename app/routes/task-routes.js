@@ -4,7 +4,7 @@ module.exports = function(app, db) {
     app.get('/tasks/:id', (req, res) => {
         const id = req.params.id;
         const details = { '_id': new ObjectID(id) };
-        db.collection('users').findOne(details, (err, item) => {
+        db.collection('tasks').findOne(details, (err, item) => {
             if (err) {
                 res.send({'error': 'An error has occurred'});
             } else {
