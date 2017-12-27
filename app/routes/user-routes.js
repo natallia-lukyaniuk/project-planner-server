@@ -31,8 +31,8 @@ module.exports = function(app, db) {
     app.post('/users', (req, res) => {
       const user = {
         login: req.body.login,
-        first_name: req.body.first_name,
-        last_name: req.body.last_name,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
         password: req.body.password,
         avatar: req.body.avatar,
         title: req.body.title

@@ -8,7 +8,11 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error': 'An error has occurred'});
             } else {
-                res.send(item);
+              const taskDetails = { 'projectId': id };
+              db.collection('tasks').find(taskDetails).toArray((err, items) => {
+                const project = Object.assign({}, item, {tasks: items});
+                res.send(project);
+              });
             }
         });
     });
@@ -29,17 +33,15 @@ module.exports = function(app, db) {
       });
     });
     app.post('/projects', (req, res) => {
-      console.log(req.body);
       const project = {
-        tasks: req.body.tasks,
         title: req.body.title,
-        avatar: req.body.avatar
+        avatar: req.body.avatar,
+        description: req.body.description
       };
       db.collection('projects').insert(project, (err, result) => {
         if (err) { 
           res.send({ 'error': 'An error has occurred' }); 
         } else {
-          console.log(result);
           res.send(result.ops[0]);
         }
       });
@@ -48,9 +50,9 @@ module.exports = function(app, db) {
         const id = req.params.id;
         const details = { '_id': new ObjectID(id) };
         const project = {
-            tasks: req.body.tasks,
             title: req.body.title,
-            avatar: req.body.avatar
+            avatar: req.body.avatar,
+            description: req.body.description
         };
         db.collection('projects').update(details, project, (err, result) => {
           if (err) {

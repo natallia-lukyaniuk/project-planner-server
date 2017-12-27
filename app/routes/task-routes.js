@@ -8,7 +8,15 @@ module.exports = function(app, db) {
             if (err) {
                 res.send({'error': 'An error has occurred'});
             } else {
-                res.send(item);
+              const userDetails = { '_id': new ObjectID(item.userId) };
+              db.collection('users').findOne(userDetails, (err, user) => {
+                if (err) {
+                  res.send({'error': 'An error has occurred'});
+                } else {
+                  const task = Object.assign({}, item, {user: user});
+                  res.send(task);
+                }
+              })
             }
         });
     });
@@ -31,10 +39,14 @@ module.exports = function(app, db) {
     app.post('/tasks', (req, res) => {
       const task = {
         title: req.body.title,
-        start_date: req.body.start_date,
-        end_date: req.body.end_date,
-        user_id: req.body.user_id,
-        project_id: req.body.project_id,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+        userId: req.body.userId,
+        projectId: req.body.projectId,
+        type: req.body.type,
+        number: req.body.number,
+        description: req.body.description,
+        status: req.body.status
       };
       db.collection('tasks').insert(task, (err, result) => {
         if (err) { 
@@ -49,10 +61,14 @@ module.exports = function(app, db) {
         const details = { '_id': new ObjectID(id) };
         const task = {
           title: req.body.title,
-          start_date: req.body.start_date,
-          end_date: req.body.end_date,
-          user_id: req.body.user_id,
-          project_id: req.body.project_id,
+          startDate: req.body.startDate,
+          endDate: req.body.endDate,
+          userId: req.body.userId,
+          projectId: req.body.projectId,
+          type: req.body.type,
+          number: req.body.number,
+          description: req.body.description,
+          status: req.body.status
         };
         db.collection('tasks').update(details, task, (err, result) => {
           if (err) {

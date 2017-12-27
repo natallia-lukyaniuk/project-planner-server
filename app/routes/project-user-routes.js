@@ -1,61 +1,49 @@
 var ObjectID = require('mongodb').ObjectID;
+var async = require('async');
 
 module.exports = function(app, db) {
-    app.get('/projects/:id', (req, res) => {
-        const id = req.params.id;
-        const details = { '_id': new ObjectID(id) };
-        db.collection('users').findOne(details, (err, item) => {
-            if (err) {
-                res.send({'error': 'An error has occurred'});
-            } else {
-                res.send(item);
-            }
+    app.get('/projects/:id/members', (req, res) => {
+      const id = req.params.id;
+      const memberDetails = { 'projectId': id };
+      const users = [];
+      db.collection('project_user').find(memberDetails).toArray((err, items) => {
+        async.map(items, (item, next) => {
+          const memberId = { '_id': new ObjectID(item.userId) };
+          db.collection('users').findOne(memberId, (err, user) => {
+            next(err, user);
+          });
+        },
+        function (err, users) {
+          res.send(users);
         });
-    });
-    app.get('/projects', (req, res) => {
-      db.collection('projects').find().toArray((err, items) => {
-        res.send(items);
       });
     });
-    app.delete('/projects/:id', (req, res) => {
+    app.delete('/projects/:id/delete', (req, res) => {
       const id = req.params.id;
       const details = { '_id': new ObjectID(id) };
-      db.collection('projects').remove(details, (err, item) => {
+      const project_user = {
+        projectId: req.params.id,
+        userId: req.query.memberId
+      };
+      db.collection('project_user').remove(project_user, (err, item) => {
         if (err) {
           res.send({'error':'An error has occurred'});
         } else {
           res.send('project ' + id + ' deleted!');
-        } 
+        }
       });
     });
-    app.post('/projects', (req, res) => {
-      const project = {
-        name: req.body.name,
-        tasks: req.body.tasks,
-        title: req.body.title
-      };
-      db.collection('projects').insert(project, (err, result) => {
+    app.post('/projects/:id/add', (req, res) => {
+      const project_user = {
+        projectId: req.params.id,
+        userId: req.query.memberId
+      }
+      db.collection('project_user').insert(project_user, (err, result) => {
         if (err) { 
           res.send({ 'error': 'An error has occurred' }); 
         } else {
           res.send(result.ops[0]);
         }
       });
-    });
-    app.put ('/projects/:id', (req, res) => {
-        const id = req.params.id;
-        const details = { '_id': new ObjectID(id) };
-        const project = {
-          name: req.body.name,
-          tasks: req.body.tasks,
-          title: req.body.title
-        };
-        db.collection('projects').update(details, project, (err, result) => {
-          if (err) {
-              res.send({'error':'An error has occurred'});
-          } else {
-              res.send(project);
-          } 
-        });
     });
   };
